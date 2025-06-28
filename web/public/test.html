@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文件上传测试</title>
+</head>
+<body>
+    <h1>文件上传测试</h1>
+    
+    <div>
+        <input type="file" id="testFileInput" accept=".txt">
+        <button onclick="testUpload()">测试上传</button>
+    </div>
+    
+    <div id="result"></div>
+    
+    <script>
+        function testUpload() {
+            const fileInput = document.getElementById('testFileInput');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                document.getElementById('result').innerHTML = '请选择文件';
+                return;
+            }
+            
+            console.log('测试文件:', file);
+            
+            const formData = new FormData();
+            formData.append('script', file);
+            
+            fetch('/api/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('上传结果:', data);
+                document.getElementById('result').innerHTML = JSON.stringify(data, null, 2);
+            })
+            .catch(error => {
+                console.error('上传错误:', error);
+                document.getElementById('result').innerHTML = '错误: ' + error.message;
+            });
+        }
+    </script>
+</body>
+</html>

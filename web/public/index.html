@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>剧本分析系统 - Script Analysis System</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- 侧边栏导航 -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-film"></i> 剧本分析</h2>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item active" data-tab="upload">
+                    <i class="fas fa-upload"></i>
+                    <span>上传剧本</span>
+                </li>
+                <li class="nav-item disabled" data-tab="scenes">
+                    <i class="fas fa-list"></i>
+                    <span>场景解析</span>
+                </li>
+                <li class="nav-item disabled" data-tab="analysis">
+                    <i class="fas fa-search"></i>
+                    <span>实体分析</span>
+                </li>
+                <li class="nav-item disabled" data-tab="graph">
+                    <i class="fas fa-project-diagram"></i>
+                    <span>知识图谱</span>
+                </li>
+                <li class="nav-item disabled" data-tab="timeline">
+                    <i class="fas fa-clock"></i>
+                    <span>时间线</span>
+                </li>
+                <li class="nav-item disabled" data-tab="report">
+                    <i class="fas fa-file-alt"></i>
+                    <span>分析报告</span>
+                </li>
+                <li class="nav-item" data-tab="settings">
+                    <i class="fas fa-cog"></i>
+                    <span>设置</span>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- 移动端菜单按钮 -->
+        <button class="mobile-menu-btn" id="mobileMenuBtn">
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <!-- 主内容区域 -->
+        <main class="main-content">
+            <!-- 上传剧本页面 -->
+            <div class="tab-content active" id="upload">
+                <div class="page-header">
+                    <h1>上传剧本文件</h1>
+                    <p>支持 .txt 格式的剧本文件，系统将自动解析场景、角色和对话</p>
+                </div>
+                
+                <div class="upload-section">
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-icon">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <h3>拖拽文件到此处或点击选择</h3>
+                        <p>支持 .txt 格式，最大 10MB</p>
+                        <input type="file" id="fileInput" accept=".txt" hidden>
+                        <button class="btn btn-primary" id="selectFileBtn">
+                            选择文件
+                        </button>
+                    </div>
+                    
+                    <div class="progress-section" id="progressSection" style="display: none;">
+                        <div class="progress-info">
+                            <h3 id="progressTitle">正在处理...</h3>
+                            <p id="progressDesc">请稍候，系统正在分析您的剧本</p>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                        <div class="progress-text" id="progressText">0%</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 场景解析页面 -->
+            <div class="tab-content" id="scenes">
+                <div class="page-header">
+                    <h1>场景解析结果</h1>
+                    <p>剧本中识别出的所有场景信息</p>
+                </div>
+                
+                <div class="scenes-container">
+                    <div class="scenes-stats">
+                        <div class="stat-card">
+                            <div class="stat-number" id="totalScenes">0</div>
+                            <div class="stat-label">总场景数</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="totalCharacters">0</div>
+                            <div class="stat-label">角色数量</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="intScenes">0</div>
+                            <div class="stat-label">内景场景</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="extScenes">0</div>
+                            <div class="stat-label">外景场景</div>
+                        </div>
+                    </div>
+                    
+                    <div class="scenes-list" id="scenesList">
+                        <!-- 场景列表将在这里动态生成 -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 实体分析页面 -->
+            <div class="tab-content" id="analysis">
+                <div class="page-header">
+                    <h1>实体分析结果</h1>
+                    <p>AI分析的角色服装、道具状态等信息</p>
+                </div>
+                
+                <div class="analysis-container">
+                    <div class="analysis-filters">
+                        <select id="characterFilter">
+                            <option value="">所有角色</option>
+                        </select>
+                        <select id="sceneFilter">
+                            <option value="">所有场景</option>
+                        </select>
+                    </div>
+                    
+                    <div class="analysis-results" id="analysisResults">
+                        <!-- 分析结果将在这里动态生成 -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 知识图谱页面 -->
+            <div class="tab-content" id="graph">
+                <div class="page-header">
+                    <h1>知识图谱</h1>
+                    <p>实体关系的可视化展示</p>
+                    <div class="header-actions">
+                        <button class="btn btn-secondary" id="resetGraph">
+                            <i class="fas fa-undo"></i> 重置视图
+                        </button>
+                        <button class="btn btn-secondary" id="exportGraph">
+                            <i class="fas fa-download"></i> 导出图谱
+                        </button>
+                    </div>
+                </div>
+
+                <div class="graph-container">
+                    <div class="graph-sidebar">
+                        <div class="graph-controls">
+                            <h3>图谱控制</h3>
+
+                            <div class="control-group">
+                                <label>节点类型过滤</label>
+                                <div class="checkbox-group" id="nodeTypeFilters">
+                                    <label><input type="checkbox" value="character" checked> 角色</label>
+                                    <label><input type="checkbox" value="scene" checked> 场景</label>
+                                    <label><input type="checkbox" value="clothing" checked> 服装</label>
+                                    <label><input type="checkbox" value="prop" checked> 道具</label>
+                                    <label><input type="checkbox" value="location" checked> 地点</label>
+                                    <label><input type="checkbox" value="time" checked> 时间</label>
+                                    <label><input type="checkbox" value="state"> 状态</label>
+                                </div>
+                            </div>
+
+                            <div class="control-group">
+                                <label>布局算法</label>
+                                <select id="layoutSelect">
+                                    <option value="force">力导向布局</option>
+                                    <option value="hierarchical">层次布局</option>
+                                    <option value="circular">环形布局</option>
+                                </select>
+                            </div>
+
+                            <div class="control-group">
+                                <label>搜索节点</label>
+                                <input type="text" id="nodeSearch" placeholder="输入节点名称...">
+                            </div>
+                        </div>
+
+                        <div class="graph-stats" id="graphStats">
+                            <h3>图谱统计</h3>
+                            <div class="stat-item">
+                                <span class="stat-label">节点数量:</span>
+                                <span class="stat-value" id="nodeCount">0</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-label">关系数量:</span>
+                                <span class="stat-value" id="edgeCount">0</span>
+                            </div>
+                        </div>
+
+                        <div class="graph-legend">
+                            <h3>图例</h3>
+                            <div class="legend-items" id="legendItems">
+                                <!-- 图例将在这里动态生成 -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="graph-main">
+                        <div class="graph-view" id="graphView">
+                            <!-- 知识图谱将在这里渲染 -->
+                        </div>
+
+                        <div class="graph-info" id="graphInfo" style="display: none;">
+                            <div class="info-header">
+                                <h4 id="infoTitle">节点信息</h4>
+                                <button class="close-btn" id="closeInfo">&times;</button>
+                            </div>
+                            <div class="info-content" id="infoContent">
+                                <!-- 节点详细信息将在这里显示 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 时间线页面 -->
+            <div class="tab-content" id="timeline">
+                <div class="page-header">
+                    <h1>场景时间线</h1>
+                    <p>按时间顺序排列的场景序列</p>
+                </div>
+
+                <div class="timeline-container">
+                    <div class="timeline-controls">
+                        <button class="btn btn-secondary" id="sortByNumber">按编号排序</button>
+                        <button class="btn btn-secondary" id="sortByTime">按时间排序</button>
+                    </div>
+
+                    <div class="timeline-view" id="timelineView">
+                        <!-- 时间线将在这里动态生成 -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 分析报告页面 -->
+            <div class="tab-content" id="report">
+                <div class="page-header">
+                    <h1>分析报告</h1>
+                    <p>完整的剧本分析报告</p>
+                    <div class="header-actions">
+                        <button class="btn btn-secondary" id="copyReport">
+                            <i class="fas fa-copy"></i> 复制报告
+                        </button>
+                        <button class="btn btn-primary" id="exportReport">
+                            <i class="fas fa-download"></i> 导出报告
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="report-container">
+                    <div class="report-content" id="reportContent">
+                        <!-- 报告内容将在这里显示 -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 设置页面 -->
+            <div class="tab-content" id="settings">
+                <div class="page-header">
+                    <h1>系统设置</h1>
+                    <p>配置AI服务和其他选项</p>
+                </div>
+                
+                <div class="settings-container">
+                    <div class="settings-section">
+                        <h3>火山引擎API配置</h3>
+                        <div class="form-group">
+                            <label for="apiKey">API Key</label>
+                            <input type="password" id="apiKey" placeholder="请输入您的API Key">
+                            <small>您的火山引擎方舟API密钥</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="modelId">模型ID</label>
+                            <input type="text" id="modelId" placeholder="请输入您的推理接入点ID">
+                            <small>推理接入点ID，请从火山引擎方舟平台获取</small>
+                        </div>
+                        <div class="form-group">
+                            <button class="btn btn-primary" id="testConnection">测试连接</button>
+                            <button class="btn btn-secondary" id="saveSettings">保存设置</button>
+                        </div>
+                        <div class="connection-status" id="connectionStatus" style="display: none;">
+                            <div class="status-indicator"></div>
+                            <span class="status-text"></span>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h3>系统信息</h3>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <label>版本</label>
+                                <span>1.0.0</span>
+                            </div>
+                            <div class="info-item">
+                                <label>支持格式</label>
+                                <span>.txt 剧本文件</span>
+                            </div>
+                            <div class="info-item">
+                                <label>最大文件大小</label>
+                                <span>10MB</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 加载指示器 -->
+    <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+        <div class="loading-spinner">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>加载中...</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

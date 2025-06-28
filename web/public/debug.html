@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>调试页面</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .debug { background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 5px; }
+        button { padding: 10px 20px; margin: 5px; }
+        input[type="file"] { margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>文件上传调试</h1>
+    
+    <div class="debug">
+        <h3>步骤1: 选择文件</h3>
+        <input type="file" id="fileInput" accept=".txt">
+        <button onclick="testFileSelection()">测试文件选择</button>
+    </div>
+    
+    <div class="debug">
+        <h3>步骤2: 上传文件</h3>
+        <button onclick="testUpload()">测试上传</button>
+    </div>
+    
+    <div class="debug">
+        <h3>调试信息</h3>
+        <div id="debugInfo"></div>
+    </div>
+    
+    <script>
+        function log(message) {
+            const debugInfo = document.getElementById('debugInfo');
+            debugInfo.innerHTML += '<p>' + new Date().toLocaleTimeString() + ': ' + message + '</p>';
+            console.log(message);
+        }
+        
+        function testFileSelection() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            
+            if (file) {
+                log('文件已选择: ' + file.name + ' (大小: ' + file.size + ' 字节)');
+            } else {
+                log('没有选择文件');
+            }
+        }
+        
+        function testUpload() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                log('错误: 请先选择文件');
+                return;
+            }
+            
+            log('开始上传文件: ' + file.name);
+            
+            const formData = new FormData();
+            formData.append('script', file);
+            
+            fetch('/api/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                log('收到响应，状态: ' + response.status);
+                return response.json();
+            })
+            .then(data => {
+                log('上传成功: ' + JSON.stringify(data));
+            })
+            .catch(error => {
+                log('上传失败: ' + error.message);
+            });
+        }
+        
+        // 页面加载完成
+        document.addEventListener('DOMContentLoaded', function() {
+            log('页面加载完成');
+        });
+    </script>
+</body>
+</html>
