@@ -22,8 +22,8 @@
 
 ```bash
 # 克隆项目
-git clone <repository-url>
-cd WE3
+git clone
+cd script-analysis-system
 
 # 安装依赖
 npm install
