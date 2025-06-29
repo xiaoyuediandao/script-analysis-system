@@ -1,6 +1,9 @@
 # 剧本分析系统 (Script Analysis System)
 
 一个基于AI的剧本分析工具，专门用于影视制作中的接戏问题分析。系统能够解析剧本文件，提取角色服装、道具状态等信息，并生成详细的分析报告和知识图谱可视化。
+![2-1](https://github.com/user-attachments/assets/4adcfa9a-73cb-4e21-95a3-976a574306d7)
+![2-2](https://github.com/user-attachments/assets/f90bc3be-c72a-484a-8fc8-4825c88c681c)
+![2-3](https://github.com/user-attachments/assets/a10f13c4-4143-4eb9-b2e3-b95eabb03041)
 
 ## 功能特性
 
